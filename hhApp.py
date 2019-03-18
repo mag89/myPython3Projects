@@ -4,8 +4,8 @@ from datetime import datetime
 #import asyncio
 #import aiohttp
 
-url = "https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&text=Python&page=0"
-
+search = "python"
+url = "https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&search_field=name&items_on_page=100&text={}&page=0".format(search)
 # блокирующая функция
 def load_page(url, timeout=0.1):
     try:
@@ -13,6 +13,7 @@ def load_page(url, timeout=0.1):
         page = data.decode("utf-8")
         return page
     except:
+        print("Не получилось открыть ссылку: ", url)
         return False
 
 
@@ -23,8 +24,8 @@ def num_of_pages(url):
         num_of_pages = [x[11:-1] for x in num_of_pages][-2]
         return int(num_of_pages)
     else:
-        print("Не открывается ссылка для подчета страниц, возвращаю 99")
-        return 99
+        print("Не открывается ссылка для подчета страниц, возвращаю 19")
+        return 19
 
 
 def gen_set_of_urls_pages(url):
@@ -38,8 +39,8 @@ def set_of_urls_vacancys(url):
     set_of_urls_pages = gen_set_of_urls_pages(url)
     for i in set_of_urls_pages:
         page = load_page(i)
-        if page:                  
-            match_of_urls_vacancys = re.findall("https://hh.ru/vacancy/\d+\?query=Python", page)
+        if page:
+            match_of_urls_vacancys = re.findall("https://hh.ru/vacancy/\d+\?query={}".format(search), page)
             set_of_urls_vacancys.update(match_of_urls_vacancys)
         else:
             continue
