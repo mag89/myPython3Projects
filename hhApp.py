@@ -1,13 +1,16 @@
 import urllib.request
 import re
 from datetime import datetime
-#import asyncio
-#import aiohttp
+# import aiohttp
+# import asyncio
 
 search = "java+game"
-url = "https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&search_field=name&items_on_page=100&text={}&page=0".format(search)
+url = "https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&search_field=name" \
+      "&items_on_page=100&text={}&page=0".format(search)
+
+
 # блокирующая функция
-def load_page(url, timeout=0.1):
+def load_page(url):
     try:
         data = urllib.request.urlopen(url).read()
         page = data.decode("utf-8")
@@ -59,12 +62,12 @@ def get_vacancy_desc(url):
             list_of_desc.append(match_of_desc)
         else:
             continue
-    
+    print(list_of_desc)
     list_of_strongs = list()
-    for i in list_of_desc:
-        match_of_strongs = re.findall(r"^\".+$\"", i[0])
+    d = dict()
+    for desc in list_of_desc:
+        match_of_strongs = re.findall(r"<[listrong]+>[^<>]+<[/listrong]+>", desc[0])
         if match_of_strongs != []:
-#             match_of_strongs = [x[4:-5] for x in match_of_strongs]
             list_of_strongs.append(match_of_strongs)
         else:
             print(len(i))
@@ -77,4 +80,5 @@ list_of_desc = get_vacancy_desc(url)
 t1 = datetime.now()
 print(t1-t0)
 print(len(list_of_desc))
-print(list_of_desc)
+for i in list_of_desc[0]:
+    print(i)
