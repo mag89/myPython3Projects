@@ -4,9 +4,9 @@ from datetime import datetime
 import asyncio
 import aiohttp
 
-search = "python+game"
+search = "C%2B%2B+game"
 url = "https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&search_field=name&items_on_page=100&text={}&page=0".format(search)
-# блокирующая функция
+# блокирующая функция, ждущая ответа от сервера
 def load_page(url, timeout=0.1):
     try:
         data = urllib.request.urlopen(url).read()
@@ -17,6 +17,7 @@ def load_page(url, timeout=0.1):
         return False
 
 
+# функция подсчета кол-ва страниц с вакансиями, грузит load_page() 1 раз
 def num_of_pages(url):
     t0 = datetime.now()
     page = load_page(url)
@@ -37,6 +38,7 @@ def num_of_pages(url):
     
 
 
+# функция генерации множества с ссылками страниц с вакансиями (максимум 20 ссылок), грузит load_page() 1 раз
 def gen_set_of_urls_pages(url):
     t0 = datetime.now()
     set_of_urls_pages = {(url[0:-1] + str(x)) for x in range(num_of_pages(url) + 1)}
@@ -47,6 +49,7 @@ def gen_set_of_urls_pages(url):
     
 
 
+# функция генерации множества с ссылками на сами вакансии (максимум 2000 ссылок), грузит load_page() до 21 раза
 def set_of_urls_vacancys(url):
     t0 = datetime.now()
     set_of_urls_vacancys = set()
@@ -65,6 +68,7 @@ def set_of_urls_vacancys(url):
 
 
 
+# функция парсинга тегов вакансий (максимум 2000 вакансий), грузит load_page() до 2021 раза
 def get_vacancy_desc(url):
     t0 = datetime.now()
     list_of_desc = list()
@@ -84,6 +88,7 @@ def get_vacancy_desc(url):
     
 
 
+# функция подсчета  тегов их сортировка и вывод
 def get_most_popular_tag(url):
     list_of_desc = get_vacancy_desc(url)
     dictionary_of_vacansys_tag = {}
@@ -99,7 +104,7 @@ def get_most_popular_tag(url):
     
     t1 = datetime.now()
     print("Пузырьковая сортировка списка - ", t1-t0)
-    return list_of_vacansys_tag[0:20]
+    return list_of_vacansys_tag
     
 
 t0 = datetime.now()
