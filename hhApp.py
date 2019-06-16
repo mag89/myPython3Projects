@@ -1,10 +1,8 @@
 import urllib.request
 import re
 from datetime import datetime
-#import asyncio
-#import aiohttp
 
-search = "C%2B%2B+game"
+search = "python"
 url = "https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&search_field=name&items_on_page=100&text={}&page=0".format(search)
 
 
@@ -71,42 +69,42 @@ def set_of_urls_vacancys(url):
 
 
 ## функция парсинга тегов вакансий (максимум 2000 вакансий), грузит load_page() до 2021 раза
-#def get_vacancy_desc(url):
-    #t0 = datetime.now()
-    #list_of_desc = list()
-    #for i in set_of_urls_vacancys(url):
-        #page_vacancy = load_page(i)
-        #if page_vacancy:
-            #match_of_desc = re.findall(r"data-tag-id=\"[а-яА-Яa-zA-Z\+-/ ]+\"", page_vacancy)
-            #match_of_desc = [x[13:-1] for x in match_of_desc]
-            #if match_of_desc != []:
-                #list_of_desc.extend(match_of_desc)
-        #else:
-            #continue
-    #t1 = datetime.now()
-    #print("Общее кол-во тегов вакансий: ", len(list_of_desc))
-    #print("gen_vacancy_desc - ", t1-t0)
-    #return list_of_desc
-    #
-#
-#
-## функция подсчета  тегов их сортировка и вывод
-#def get_most_popular_tag(url):
-    #list_of_desc = get_vacancy_desc(url)
-    #dictionary_of_vacansys_tag = {}
-    #for i in list_of_desc:
-        #dictionary_of_vacansys_tag[i] = list_of_desc.count(i)
-    #
-    #list_of_vacansys_tag = list(dictionary_of_vacansys_tag.items())
-    #t0 = datetime.now()
-    #for i in range(len(list_of_vacansys_tag) - 1):
-        #for z in range(len(list_of_vacansys_tag) - i - 1):
-            #if list_of_vacansys_tag[z][1] < list_of_vacansys_tag[z+1][1]:
-                #list_of_vacansys_tag[z], list_of_vacansys_tag[z+1] = list_of_vacansys_tag[z+1], list_of_vacansys_tag[z]
-    #
-    #t1 = datetime.now()
-    #print("Пузырьковая сортировка списка - ", t1-t0)
-    #return list_of_vacansys_tag
+def get_vacancy_desc(url):
+    t0 = datetime.now()
+    list_of_desc = list()
+    for i in set_of_urls_vacancys(url):
+        page_vacancy = load_page(i)
+        if page_vacancy:
+            match_of_desc = re.findall(r"data-tag-id=\"[а-яА-Яa-zA-Z\+-/ ]+\"", page_vacancy)
+            match_of_desc = [x[13:-1] for x in match_of_desc]
+            if match_of_desc != []:
+                list_of_desc.extend(match_of_desc)
+        else:
+            continue
+    t1 = datetime.now()
+    print("Общее кол-во тегов вакансий: ", len(list_of_desc))
+    print("gen_vacancy_desc - ", t1-t0)
+    return list_of_desc
+    
+
+
+# функция подсчета  тегов их сортировка и вывод
+def get_most_popular_tag(url):
+    list_of_desc = get_vacancy_desc(url)
+    dictionary_of_vacansys_tag = {}
+    for i in list_of_desc:
+        dictionary_of_vacansys_tag[i] = list_of_desc.count(i)
+    
+    list_of_vacansys_tag = list(dictionary_of_vacansys_tag.items())
+    t0 = datetime.now()
+    for i in range(len(list_of_vacansys_tag) - 1):
+        for z in range(len(list_of_vacansys_tag) - i - 1):
+            if list_of_vacansys_tag[z][1] < list_of_vacansys_tag[z+1][1]:
+                list_of_vacansys_tag[z], list_of_vacansys_tag[z+1] = list_of_vacansys_tag[z+1], list_of_vacansys_tag[z]
+    
+    t1 = datetime.now()
+    print("Пузырьковая сортировка списка - ", t1-t0)
+    return list_of_vacansys_tag
     
 
 t0 = datetime.now()
