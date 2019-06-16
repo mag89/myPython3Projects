@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.7
 
 from urllib import request as req
+from urllib.parse import quote
 import re
 import time
 import asyncio
@@ -8,27 +9,25 @@ import aiohttp
 from sys import argv
 
 
-# generate set of pages with urls on vacancies
+# syncronous generate set of pages with urls on vacancies
 def gen_set_of_pages_with_urls(url: str) -> frozenset:
     try:
         response = req.urlopen(url).read()
         data = response.decode("utf-8")
     except:
-        print("Can`t open url")
         data = False
     if data:
         num_of_pages = re.findall(r"data-page=\"\d+\"", data)
         if num_of_pages == []:
             num_of_pages = 0
         else:
-            num_of_pages =int([x[11:-1] for x in num_of_pages][-2])
+            num_of_pages = int([x[11:-1] for x in num_of_pages][-2])
+            #сначала срез, потом преобразование!!! ##  num_of_pages = int(num_of_pages[-2][11:-1])
     else:
         print("Can`t open url for calculate pages, returning 19")
         num_of_pages = 19
     set_of_urls_pages = {(url[0:-1] + str(x)) for x in range(num_of_pages + 1)}
     return frozenset(set_of_urls_pages)
-
-
 
 
 # fetch urls on vacancies and update set of urls on vacancies
@@ -47,13 +46,11 @@ async def gen_set_of_urls_on_vac(url: str) -> None:
     tasks = []
     set_of_pages_with_urls = gen_set_of_pages_with_urls(url)
     async with aiohttp.ClientSession() as session:
-        ##tasks = [asyncio.create_task(fetch_urls_on_vac(x, session) for x in set_of_pages_with_urls)]
+        ##  tasks = [asyncio.create_task(fetch_urls_on_vac(x, session) for x in set_of_pages_with_urls)]
         for _ in set_of_pages_with_urls:
             task = asyncio.create_task(fetch_urls_on_vac(_, session))
             tasks.append(task)
         await asyncio.gather(*tasks)
-
-
 
 
 # fetch tags in vacancy desc
@@ -76,24 +73,20 @@ async def get_all_tags() -> None:
         await asyncio.gather(*tasks)
 
 
+# lets sorting tags
 def get_sorted_tags() -> list:
-    ##  dict_of_tags = {x: y for x in all_tags for y in all_tags.count(x)}
+    uniq_tags = tuple(frozenset(all_tags))
     dict_of_tags = dict()
-    for i in all_tags:
-        dict_of_tags[i] = all_tags.count(i)
-
-    count_all_tags = list(dict_of_tags.items())
-    for i in range(len(count_all_tags) - 1):
-        for z in range(len(count_all_tags) - i - 1):
-            if count_all_tags[z][1] < count_all_tags[z+1][1]:
-                count_all_tags[z], count_all_tags[z+1] = count_all_tags[z+1], count_all_tags[z]
-    return count_all_tags
-
+    list_of_tags = list()
+    for _ in uniq_tags:
+        dict_of_tags[_] = all_tags.count(_)
+    return sorted(dict_of_tags.items(), key=lambda x: x[1], reverse=True)
 
 
 if __name__ == "__main__":
     args = argv[1:3]
-    search = str(args[0])
+    print(args)
+    search = quote(args[0])
     print(f"Search vacancies: {search}")
     url = f"https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&search_field=name&items_on_page=100&text={search}&page=0"
     set_of_urls_on_vac =  set()
@@ -104,9 +97,17 @@ if __name__ == "__main__":
     elapsed = time.perf_counter() - start
     count_all_tags = get_sorted_tags()
     print(f"get_all_tags() complit in {elapsed:0.2f} seconds.")
-    print(f"Number vacancies: {len(set_of_urls_on_vac)}")
-    i = 1
-    for _ in range(int(args[1])):
-        print(f"{i}. {count_all_tags[_][0][12:]} - {count_all_tags[_][1]}")
-        i += 1
+    print(f"Number of vacancies: {len(set_of_urls_on_vac)}")
+    if len(count_all_tags) > 0:
+        if int(args[1]) > len(count_all_tags):
+            num = len(count_all_tags)
+            print(f"Found just {num} tags")
+        else:
+            num = int(args[1])
+        i = 1
+        for _ in range(num):
+            print(f"{i}. {count_all_tags[_][0][12:]} - {count_all_tags[_][1]}")
+            i += 1
+    else:
+        print("Don't found any tags in vacancies")
 
