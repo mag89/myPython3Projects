@@ -21,8 +21,8 @@ def gen_set_of_pages_with_urls(url: str) -> frozenset:
         if num_of_pages == []:
             num_of_pages = 0
         else:
-            num_of_pages = int([x[11:-1] for x in num_of_pages][-2])
-            #сначала срез, потом преобразование!!! ##  num_of_pages = int(num_of_pages[-2][11:-1])
+            ## num_of_pages = int([x[11:-1] for x in num_of_pages][-2])
+            num_of_pages = int(num_of_pages[-2][11:-1])
     else:
         print("Can`t open url for calculate pages, returning 19")
         num_of_pages = 19
@@ -35,7 +35,7 @@ async def fetch_urls_on_vac(url: str, session: aiohttp.client.ClientSession) -> 
     try:
         async with session.get(url) as response:
             data = await response.text()
-            urls_on_vac = re.findall(f"https://hh\.ru/vacancy/\d+\?query={search.replace('+', '%20')}", data)
+            urls_on_vac = re.findall(f"https://hh\.ru/vacancy/\d+\?query={search}", data)
             set_of_urls_on_vac.update(urls_on_vac)
     except:
         print(f"Can`t open page with vacancies - {url}.")
@@ -87,7 +87,6 @@ if __name__ == "__main__":
     args = argv[1:3]
     print(args)
     search = quote(args[0])
-    print(f"Search vacancies: {search}")
     url = f"https://hh.ru/search/vacancy?area=0&clusters=true&enable_snippets=true&search_field=name&items_on_page=100&text={search}&page=0"
     set_of_urls_on_vac =  set()
     all_tags = list()
