@@ -21,8 +21,7 @@ def gen_set_of_pages_with_urls(url: str) -> frozenset:
         if num_of_pages == []:
             num_of_pages = 0
         else:
-            num_of_pages = int([x[11:-1] for x in num_of_pages][-2])
-            #сначала срез, потом преобразование!!! ##  num_of_pages = int(num_of_pages[-2][11:-1])
+            num_of_pages = int(num_of_pages[-2][11:-1])
     else:
         print("Can`t open url for calculate pages, returning 19")
         num_of_pages = 19
